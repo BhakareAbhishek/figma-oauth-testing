@@ -1,108 +1,118 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>GitHub OAuth Callback</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GitHub OAuth Code</title>
   <style>
+    :root {
+      --color-primary: #7825E9;
+      --color-text-primary: #353535;
+      --color-text-secondary: #646464;
+      --color-border: #E1E3EA;
+      --color-badge-github: #CDCDCD;
+      --color-badge-github-text: #646464;
+      --color-background: #f6f8fa;
+    }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--color-background);
+      margin: 0;
+      padding: 2rem;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      margin: 0;
-      padding: 20px;
-      background-color: #f6f8fa;
     }
+
     .container {
       background: white;
-      padding: 30px;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      padding: 2rem;
       max-width: 500px;
       width: 100%;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
       text-align: center;
     }
+
+    h2 {
+      color: var(--color-text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .message {
+      color: var(--color-text-secondary);
+      margin-bottom: 1.5rem;
+    }
+
     .code-box {
       background: #f5f5f5;
-      padding: 15px;
-      border-radius: 4px;
-      margin: 20px 0;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+      font-weight: 500;
       word-break: break-all;
+      color: var(--color-text-primary);
     }
-    .message {
-      color: #24292e;
-      margin-bottom: 20px;
+
+    .copy-btn {
+      background-color: var(--color-primary);
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      font-size: 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
     }
-    .success {
-      color: #2ea44f;
-      font-weight: bold;
+
+    .copy-btn:hover {
+      background-color: #5f1ec0;
     }
-    .error {
-      color: #cb2431;
-      font-weight: bold;
+
+    .copied-message {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      color: var(--color-badge-github-text);
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div id="content">
-      <h2>GitHub Authorization</h2>
-      <p class="message">Processing your authorization...</p>
-    </div>
+    <h2>Authorization Complete</h2>
+    <p class="message">Your GitHub authorization was successful.</p>
+    <div id="codeBox" class="code-box">Loading code...</div>
+    <button class="copy-btn" onclick="copyCode()">Copy Code</button>
+    <p id="copiedMsg" class="copied-message" style="display: none;">✅ Code copied to clipboard</p>
   </div>
 
   <script>
-    (function () {
-      const content = document.getElementById('content');
-      const url = new URL(window.location.href);
-      const code = url.searchParams.get('code');
-      const state = url.searchParams.get('state');
+    const url = new URL(window.location.href);
+    const code = url.searchParams.get('code');
+    const codeBox = document.getElementById('codeBox');
+    const copiedMsg = document.getElementById('copiedMsg');
 
-      console.log('✅ Code:', code);
-      console.log('🔐 State:', state);
+    if (code) {
+      codeBox.textContent = code;
+    } else {
+      codeBox.textContent = 'No code found in URL';
+    }
 
-      if (!code || !state) {
-        content.innerHTML = `
-          <h2>GitHub Authorization</h2>
-          <p class="message error">Error: Missing authorization code or state</p>
-          <p>Please try the authorization process again.</p>
-        `;
-        return;
-      }
-
-      if (window.opener) {
-        content.innerHTML = `
-          <h2>GitHub Authorization</h2>
-          <p class="message success">Authorization successful!</p>
-          <p>Please copy the code below and return to the Figma plugin:</p>
-          <div class="code-box">
-            <code>${code}</code>
-          </div>
-          <p>This window will close automatically in 5 seconds...</p>
-        `;
-
-        // Send message to opener
-        window.opener.postMessage(
-          { type: 'github-code', code, state },
-          '*' // allow all origins
-        );
-
-        // Close window after 5 seconds
-        setTimeout(() => {
-          window.close();
-        }, 5000);
-      } else {
-        content.innerHTML = `
-          <h2>GitHub Authorization</h2>
-          <p class="message error">Error: Could not communicate with plugin</p>
-          <p>Please copy the code below and return to the Figma plugin:</p>
-          <div class="code-box">
-            <code>${code}</code>
-          </div>
-        `;
-      }
-    })();
+    function copyCode() {
+      navigator.clipboard.writeText(code)
+        .then(() => {
+          copiedMsg.style.display = 'block';
+          setTimeout(() => copiedMsg.style.display = 'none', 3000);
+        })
+        .catch(err => {
+          copiedMsg.textContent = '❌ Failed to copy';
+          copiedMsg.style.display = 'block';
+        });
+    }
   </script>
 </body>
 </html>
