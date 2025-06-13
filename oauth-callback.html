@@ -1,19 +1,29 @@
 <!DOCTYPE html>
 <html>
-  <head><title>GitHub OAuth Callback</title></head>
-  <body>
-    <script>
+<head>
+  <title>GitHub OAuth Callback</title>
+</head>
+<body>
+  <script>
+    (function () {
       const url = new URL(window.location.href);
-      const code = url.searchParams.get("code");
-      const state = url.searchParams.get("state");
+      const code = url.searchParams.get('code');
+      const state = url.searchParams.get('state');
 
-      console.log("✅ GitHub OAuth Code:", code);
-      console.log("🔐 State:", state);
+      console.log('✅ Code:', code);
+      console.log('🔐 State:', state);
 
       if (window.opener) {
-        window.opener.postMessage({ type: "github-code", code, state }, "*");
-        window.close();
+        window.opener.postMessage(
+          { type: 'github-code', code, state },
+          '*' // allow all origins
+        );
+        window.close(); // Close the popup
+      } else {
+        console.warn('window.opener is null');
+        document.body.innerHTML += '<p>Could not communicate with plugin.</p>';
       }
-    </script>
-  </body>
+    })();
+  </script>
+</body>
 </html>
