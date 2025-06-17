@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>GitHub OAuth Code</title>
+  <title>Authorization Successful - Pundit Inspect</title>
   <style>
     :root {
       --color-primary: #7825E9;
@@ -19,7 +19,7 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background-color: var(--color-background);
       margin: 0;
-      padding: 2rem;
+      padding: 0;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -30,87 +30,151 @@
       background: white;
       border: 1px solid var(--color-border);
       border-radius: 10px;
-      padding: 2rem;
-      max-width: 500px;
+      padding: 2.5rem;
+      max-width: 550px;
       width: 100%;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
       text-align: center;
+    }
+
+    .logo-container {
+      margin-bottom: 1.5rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .logo {
+      max-height: 50px;
+      max-width: 100%;
     }
 
     h2 {
       color: var(--color-text-primary);
-      margin-bottom: 0.5rem;
+      margin: 1.5rem 0 0.5rem;
+      font-size: 1.75rem;
     }
 
     .message {
       color: var(--color-text-secondary);
-      margin-bottom: 1.5rem;
+      margin-bottom: 2rem;
+      font-size: 1.1rem;
     }
 
     .code-box {
       background: #f5f5f5;
       border: 1px solid var(--color-border);
-      border-radius: 6px;
-      padding: 1rem;
-      margin-bottom: 1rem;
+      border-radius: 8px;
+      padding: 1.2rem;
+      margin-bottom: 1.5rem;
       font-size: 1.2rem;
       font-weight: 500;
       word-break: break-all;
       color: var(--color-text-primary);
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
     }
 
     .copy-btn {
       background-color: var(--color-primary);
       color: white;
       border: none;
-      padding: 0.6rem 1.2rem;
-      font-size: 1rem;
-      border-radius: 5px;
+      padding: 0.8rem 2rem;
+      font-size: 1.1rem;
+      border-radius: 6px;
       cursor: pointer;
-      transition: background-color 0.2s ease;
+      transition: all 0.2s ease;
+      font-weight: 500;
     }
 
     .copy-btn:hover {
       background-color: #5f1ec0;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(120, 37, 233, 0.3);
+    }
+
+    .copy-btn:active {
+      transform: translateY(0);
+      box-shadow: none;
     }
 
     .copied-message {
-      margin-top: 10px;
+      margin-top: 15px;
+      font-size: 1rem;
+      color: #2c974b;
+      font-weight: 500;
+    }
+    
+    .info-text {
+      margin-top: 2rem;
       font-size: 0.9rem;
-      color: var(--color-badge-github-text);
+      color: var(--color-text-secondary);
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>Authorization Complete</h2>
-    <p class="message">Your GitHub authorization was successful.</p>
-    <div id="codeBox" class="code-box">Loading code...</div>
-    <button class="copy-btn" onclick="copyCode()">Copy Code</button>
-    <p id="copiedMsg" class="copied-message" style="display: none;">✅ Code copied to clipboard</p>
+    <div class="logo-container">
+      <img src="https://raaghustorageaccount.blob.core.windows.net/raaghu-blob/pundit-color-logo.png" alt="Pundit Logo" class="logo" />
+      <img src="https://raaghustorageaccount.blob.core.windows.net/pundit-blob/wai-logo.svg" alt="WAI Logo" class="logo" />
+    </div>
+    
+    <h2>Authorization Successful</h2>
+    <p class="message">Please copy the code below and paste it in the Pundit Inspect plugin.</p>
+    
+    <div id="codeBox" class="code-box">Loading authorization code...</div>
+    
+    <button class="copy-btn" onclick="copyCode()">
+      <span id="copyText">Copy Code</span>
+    </button>
+    
+    <p id="copiedMsg" class="copied-message" style="display: none;">
+      ✅ Code copied to clipboard
+    </p>
+    
+    <p class="info-text">You can close this window after copying the code.</p>
   </div>
 
   <script>
+    // Get the authorization code from URL params
     const url = new URL(window.location.href);
     const code = url.searchParams.get('code');
     const codeBox = document.getElementById('codeBox');
     const copiedMsg = document.getElementById('copiedMsg');
+    const copyText = document.getElementById('copyText');
 
+    // Display the code or error message
     if (code) {
       codeBox.textContent = code;
     } else {
-      codeBox.textContent = 'No code found in URL';
+      codeBox.textContent = 'No authorization code found in URL';
+      codeBox.style.color = '#d73a49';
     }
 
+    // Copy the code to clipboard
     function copyCode() {
+      if (!code) {
+        copiedMsg.textContent = '❌ No code to copy';
+        copiedMsg.style.color = '#d73a49';
+        copiedMsg.style.display = 'block';
+        setTimeout(() => copiedMsg.style.display = 'none', 3000);
+        return;
+      }
+      
       navigator.clipboard.writeText(code)
         .then(() => {
+          copyText.textContent = "Copied!";
           copiedMsg.style.display = 'block';
-          setTimeout(() => copiedMsg.style.display = 'none', 3000);
+          setTimeout(() => {
+            copyText.textContent = "Copy Code";
+            copiedMsg.style.display = 'none';
+          }, 3000);
         })
         .catch(err => {
           copiedMsg.textContent = '❌ Failed to copy';
+          copiedMsg.style.color = '#d73a49';
           copiedMsg.style.display = 'block';
+          setTimeout(() => copiedMsg.style.display = 'none', 3000);
         });
     }
   </script>
